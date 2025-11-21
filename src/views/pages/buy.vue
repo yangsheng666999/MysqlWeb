@@ -62,55 +62,55 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeMount, ref } from 'vue'
-import { userStore } from '@/stores/user.ts'
-import { getAllBuy } from '@/hook/buy.ts'
+  import { onBeforeMount, ref } from 'vue'
+  import { userStore } from '@/stores/user.ts'
+  import { getAllBuy } from '@/hook/buy.ts'
 
-interface TableData {
-  gid: string
-  gname: string
-  price: number
-  time: string
-}
-
-const user = userStore()
-const list = ref<TableData[]>([])
-const Page = ref<number>(1)
-const total = ref<number>(0)
-const loading = ref<boolean>(false)
-
-// 时间格式化：把 2025-11-21T19:21:30 变成 2025-11-21 19:21:30
-function formatTime(value: string) {
-  if (!value) return '-'
-  const [date, time] = value.split('T')
-  if (!time) return value
-  // 截到秒，防止后面有 .000Z 之类
-  const t = time.split('.')[0]
-  return `${date} ${t}`
-}
-
-async function fetchData(page: number) {
-  try {
-    loading.value = true
-    const username = localStorage.getItem('username') as string
-    const response = await getAllBuy(username, page)
-    const data = response.data
-    list.value = data.list || []
-    total.value = data.total || 0
-    Page.value = data.pageNum || page
-  } finally {
-    loading.value = false
+  interface TableData {
+    gid: string
+    gname: string
+    price: number
+    time: string
   }
-}
 
-onBeforeMount(async () => {
-  await fetchData(Page.value)
-})
+  const user = userStore()
+  const list = ref<TableData[]>([])
+  const Page = ref<number>(1)
+  const total = ref<number>(0)
+  const loading = ref<boolean>(false)
 
-async function changePage(val: number) {
-  Page.value = val
-  await fetchData(val)
-}
+  // 时间格式化：把 2025-11-21T19:21:30 变成 2025-11-21 19:21:30
+  function formatTime(value: string) {
+    if (!value) return '-'
+    const [date, time] = value.split('T')
+    if (!time) return value
+    // 截到秒，防止后面有 .000Z 之类
+    const t = time.split('.')[0]
+    return `${date} ${t}`
+  }
+
+  async function fetchData(page: number) {
+    try {
+      loading.value = true
+      const username = localStorage.getItem('username') as string
+      const response = await getAllBuy(username, page)
+      const data = response.data
+      list.value = data.list || []
+      total.value = data.total || 0
+      Page.value = data.pageNum || page
+    } finally {
+      loading.value = false
+    }
+  }
+
+  onBeforeMount(async () => {
+    await fetchData(Page.value)
+  })
+  
+  async function changePage(val: number) {
+    Page.value = val
+    await fetchData(val)
+  }
 </script>
 
 <style scoped>
