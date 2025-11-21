@@ -1,33 +1,39 @@
 <template>
   <div class="contain">
-    <table>
-      <thead>
-        <tr>
-          <th>物品名</th>
-          <th>价格</th>
-          <th>创单时间</th>
-          <th>是否在售</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody v-for="item in list" :key="item.gid">
-        <tr>
-          <td>{{ item.gname }}</td>
-          <td>{{ item.price }}</td>
-          <td>{{ item.time.split('T')[0] + ' ' + item.time.split('T')[1] }}</td>
-          <td>{{ item.status === '0' ? '在售' : '已售出' }}</td>
-          <td>
-            <button @click="diashow(item.gname, item.gid, item.price)" v-if="item.status === '0'">
-              修改售价
-            </button>
-            <button style="margin-left: 10px" v-if="item.status === '0'" @click="delgood(item.gid)">
-              取消销售
-            </button>
-            <p v-else>无</p>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <el-table :data="list" border stripe style="width: 90%">
+      <el-table-column
+        prop="gname"
+        label="物品名"
+        align="center"
+      />
+      <el-table-column prop="price" label="价格" align="center"/>
+      <el-table-column label="创单时间" align="center">
+        <template #default="{ row }">
+          {{ formatTime(row.time) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="是否在售" align="center">
+        <template #default="{ row }">
+          <el-tag v-if="row.status === '0'" type="success">在售</el-tag>
+          <el-tag v-else type="info">已售出</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" align="center">
+        <template #default="{ row }">
+          <template v-if="row.status === '0'">
+            <el-button type="primary" size="small"
+                       @click="diashow(row.gname, row.gid, row.price)"
+            >修改售价</el-button>
+
+            <el-button type="danger" plain size="small"
+                       @click="delgood(row.gid)"
+            >取消销售</el-button>
+          </template>
+
+          <span v-else>无</span>
+        </template>
+      </el-table-column>
+    </el-table>
     <el-pagination
       layout="prev, pager, next,jumper"
       :total="total"
@@ -52,6 +58,7 @@
   import { onBeforeMount, ref } from 'vue'
   import { deletegood, getAllrecode, updatePrice } from '@/hook/sold.ts'
   import { userStore } from '@/stores/user.ts'
+// import { formatTime } from 'element-plus/es/components/countdown/src/utils.mjs'
 
   interface tabledata {
     gid: string
@@ -134,6 +141,13 @@
         Page.value = data.pageNum
       }
     } catch {}
+  }
+
+
+  // 简单版本的formatTime
+  function formatTime(time: string) {
+    const arr = time.split("T")
+    return arr[0] + " " + arr[1]
   }
 </script>
 
